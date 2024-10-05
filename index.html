@@ -1,0 +1,48 @@
+<html>
+    <head>
+        <style>
+            #root {
+                height: 100%;
+                display: flex;
+            }
+            
+            #canvasArea {
+                flex: .75;
+            }
+
+            #filesArea {
+                flex: .25;
+                background-color: grey;
+                height: 100%;
+                overflow-y: auto;
+            }
+
+            #previewArea {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+
+                img {
+                    max-width: 80%;
+                    margin: 16px 0;
+                    border: 1px dotted #000;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="root">
+            <div id="canvasArea">
+                <canvas id="canvas">
+            </div>
+            <div id="filesArea">
+                <label for="fileInput">Select an image</label>
+                <input type="file" id="fileInput" accept="image/*" />
+                <div id="previewArea"></div>
+            </div>
+        </div>
+    </body>
+    <footer>
+        <script type="text/javascript" id="blendScript" src="index.js"></script>
+    </footer>
+</html>
