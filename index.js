@@ -1,44 +1,69 @@
 const canvas = document.getElementById('canvas');
+const context = canvas.getContext('2d');
 const fileInput = document.getElementById('fileInput');
 const previewArea = document.getElementById('previewArea');
+const uploadStatusArea = document.getElementById('uploadStatusArea');
+const reader = new FileReader();
+const imagesInPixel = [];
 
-fileInput.addEventListener('change', (inputEvent) => {
-	if (inputEvent.target.files.length) {
-		const fileReader = new FileReader();
+const renderCanvas = () => {
+    const imageElements = document.getElementsByClassName('previewImg');
+    context.clearRect(0, 0, canvas.width, canvas.height);
 
-		fileReader.onload = (fileReadEvent) => {
-			const base64ImgSrc = fileReadEvent.target.result;
+    for (let i = 0; i < imageElements.length; i++) {
+        if (!i) {
+            canvas.width = imageElements[i].naturalWidth;
+            canvas.height = imageElements[i].naturalHeight;
+        }
+        
+        context.drawImage(imageElements[i], 0, 0);
+    }
+};
 
-            const previewImg = document.createElement('img');
-            previewImg.src = base64ImgSrc;
-            previewImg.classList = 'previewImg';
-            previewImg.title = inputEvent.target.files[0].name;
+const getPixelDataFromImageElement = (image) => {
+    context.clearRect(0, 0, canvas.width, canvas.height);
 
-            previewArea.append(previewImg);
-			drawCanvas();
-		}
+    console.log('Getting ImageData for', image);
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
 
-		fileReader.readAsDataURL(inputEvent.target.files[0]);
-	}
-});
+    context.drawImage(image, 0, 0);
 
-const drawCanvas = () => {
-	const images = document.getElementsByClassName('previewImg');
-    const imageDatas = [];
-	const context = canvas.getContext('2d');
-	console.log('images', images);
+    return context.getImageData(0, 0, canvas.width, canvas.height);
+}
 
-	const bgImgIndex = 0;
-    for (let i = 0; i < images.length; i++) {
-        images[i].addEventListener('load', () => {
-            canvas.width = images[i].naturalWidth;
-            canvas.height = images[i].naturalHeight;
+const handleFileReaderEvent = (event) => {
+    uploadStatusArea.innerHTML += `<span>${event.type}: ${event.loaded} bytes transferred</span><br/>`;
 
-            context.drawImage(images[i], 0, 0);
-            imageDatas.push(context.getImageData(0, 0, images[i].naturalWidth, images[i].naturalHeight));
-        });
+    if (event.type === "load") {
+        const imageElement = document.createElement('img');
+        imageElement.src = reader.result;
+        imageElement.classList = 'previewImg';
+        imageElement.title = fileInput.files[0].name;
+        imageElement.onload = () => {
+            previewArea.append(imageElement);
+            imagesInPixel.push(getPixelDataFromImageElement(imageElement));
+            renderCanvas();
+        };
     }
 }
+
+fileInput.addEventListener('change', () => {
+    const selectedFile = fileInput.files[0];
+
+	if (selectedFile) {
+        uploadStatusArea.innerHTML += `<b>${selectedFile.name}</b><hr/>`;
+
+        reader.addEventListener("loadstart", handleFileReaderEvent);
+        reader.addEventListener("load", handleFileReaderEvent);
+        reader.addEventListener("loadend", handleFileReaderEvent);
+        reader.addEventListener("progress", handleFileReaderEvent);
+        reader.addEventListener("error", handleFileReaderEvent);
+        reader.addEventListener("abort", handleFileReaderEvent);
+
+        reader.readAsDataURL(selectedFile);
+	}
+});
 
 const composite = (bgImg, fgImg, fgOpac) => {
     if (fgOpac === 0) return bgImg;
