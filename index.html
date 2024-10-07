@@ -36,12 +36,10 @@
                 <canvas id="canvas">
             </div>
             <div id="filesArea">
-                <label for="fileInput">Select an image:</label>
-                <br/>
                 <input type="file" id="fileInput" accept="image/*" />
-                <br/>
-                <label for="fgAlpha">Set foreground image's alpha in % (1 - 100):</label>
-                <input id="fgAlpha" type="number" value="100">
+                <hr/>
+                <label for="fgAlpha">Foreground alpha [1 - 100]%: </label>
+                <input id="fgAlpha" type="number" value="100" max="100" min="0">
                 <p id="uploadStatusArea"></p>
                 <div id="previewArea"></div>
             </div>
