@@ -11,34 +11,37 @@ const compositeAOverB = (aColor, aAlpha, bColor, bAlpha, combinedAlpha) => {
     return (aAlpha * aColor + ((1 - aAlpha) * bAlpha * bColor)) / combinedAlpha;
 }
 
-const blendForegroundIntoBackground = (bgImg, fgImg, fgAlpha, bgAlpha = 1, xOffset = 0, yOffset = 0) => {
+const blendForegroundIntoBackground = (bgImg, fgImg, fgAlpha, bgAlpha = 1, xOffsetOfFgInPixel = 0, yOffsetOfFgInPixel = 0) => {
     // Two 0-alpha would result in a division-by-zero error.
     // There's no point in blending if aAlpha 0.
     if (fgAlpha === 0) return bgImg;
 
     const combinedAlpha = fgAlpha + ((1 - fgAlpha) * bgAlpha);
-    const bytesAllocatedPerPixel = 4;
-    const numberOfPixelsOnFgImg = fgImg.width * fgImg.height;
-    const sizeOfFgImgInBytes = numberOfPixelsOnFgImg * bytesAllocatedPerPixel;
+    const bytesPerPixel = 4;
+    const sizeOfImgInBytesFg = fgImg.width * fgImg.height * bytesPerPixel;
 
-    for (let byteIndex = 0; byteIndex < sizeOfFgImgInBytes; byteIndex+= bytesAllocatedPerPixel) {
-        const fgRedIndex = byteIndex;
-        const fgGreenIndex = byteIndex + 1;
-        const fgBlueIndex = byteIndex + 2;
-        const bgRedIndex = fgRedIndex + (xOffset * bytesAllocatedPerPixel);
-        const bgGreenIndex = bgRedIndex + 1;
-        const bgBlueIndex = bgRedIndex + 2;
+    for (let byteIndex = 0; byteIndex < sizeOfImgInBytesFg; byteIndex+= bytesPerPixel) {
+        const redIndexFg = byteIndex;
+        const greenIndexFg = byteIndex + 1;
+        const blueIndexFg = byteIndex + 2;
+        const redIndexBg = redIndexFg + (xOffsetOfFgInPixel * bytesPerPixel);
+        const greenIndexBg = redIndexBg + 1;
+        const blueIndexBg = redIndexBg + 2;
 
-        const noReasonToBlend = bgImg.data.length === bgRedIndex || (!fgImg.data[fgRedIndex] && !fgImg.data[fgGreenIndex] && !fgImg.data[fgBlueIndex]);
+        const currentPixelFg = (redIndexFg / bytesPerPixel) + 1;
+        const currentPixelBg = (redIndexBg / bytesPerPixel) + 1;
+        const currentRowFg = Math.floor((redIndexFg / bytesPerPixel) / fgImg.width) + 1;
+        const currentRowBg = Math.floor((redIndexBg / bytesPerPixel)  / bgImg.width) + 1;
+        const pixelOfFgIsOutsideOfBg = currentRowFg !== currentRowBg;
 
-        if (noReasonToBlend) continue;
+        if (pixelOfFgIsOutsideOfBg) continue;
 
-        bgImg.data[bgRedIndex] =
-            compositeAOverB(fgImg.data[fgRedIndex], fgAlpha, bgImg.data[bgRedIndex], bgAlpha, combinedAlpha);
-        bgImg.data[bgGreenIndex] =
-            compositeAOverB(fgImg.data[fgGreenIndex], fgAlpha, bgImg.data[bgGreenIndex], bgAlpha, combinedAlpha);
-        bgImg.data[bgBlueIndex] =
-            compositeAOverB(fgImg.data[fgBlueIndex], fgAlpha, bgImg.data[bgBlueIndex], bgAlpha, combinedAlpha);
+        bgImg.data[redIndexBg] =
+            compositeAOverB(fgImg.data[redIndexFg], fgAlpha, bgImg.data[redIndexBg], bgAlpha, combinedAlpha);
+        bgImg.data[greenIndexBg] =
+            compositeAOverB(fgImg.data[greenIndexFg], fgAlpha, bgImg.data[greenIndexBg], bgAlpha, combinedAlpha);
+        bgImg.data[blueIndexBg] =
+            compositeAOverB(fgImg.data[blueIndexFg], fgAlpha, bgImg.data[blueIndexBg], bgAlpha, combinedAlpha);
     }
 }
 
@@ -51,7 +54,7 @@ const drawBlendedImageDataOnCanvas = () => {
     canvas.height = imagesInPixel[0].height;
 
     for (let i = imagesInPixel.length - 1; i > 0; i--) {
-        blendForegroundIntoBackground(imagesInPixel[i - 1], imagesInPixel[i], Number(fgAlphaInput.value) / 100);
+        blendForegroundIntoBackground(imagesInPixel[i - 1], imagesInPixel[i], Number(fgAlphaInput.value) / 100, 1, 1);
     }
     context.putImageData(imagesInPixel[0], 0, 0);
 };
