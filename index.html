@@ -38,8 +38,34 @@
             <div id="filesArea">
                 <input type="file" id="fileInput" accept="image/*" />
                 <hr/>
-                <label for="fgAlpha">Foreground alpha [1 - 100]%: </label>
-                <input id="fgAlpha" type="number" value="50" max="100" min="0">
+                <label for="fgAlpha">Overwrite foreground images' alphas (float, in %)</label>
+                <br/>
+                <input id="fgAlpha" type="number">
+                <br/>
+                <label for="fgAlpha">Overwrite background image's alpha (float, in %)</label>
+                <br/>
+                <input id="bgAlpha" type="number">
+                <br/>
+                <label for="overwriteOnlyNonZero" title="">Overwrite alpha only on pixels with non-zero alpha values</label>
+                <br/>
+                <input id="overwriteOnlyNonZero" type="checkbox">
+                <br/>
+                <span>
+                    Usefull when you're blending an image with transparent sections where you'd like the backround to not change.
+                    <br/>
+                    Only looks at the foreground images' alpha values!
+                </span>
+                <br/>
+                <br/>
+                <label for="fgXOffset">Foreground image's x-offset (integer, in %)</label>
+                <br/>
+                <input id="fgXOffset" type="number">
+                <br/>
+                <label for="fgYOffset">Foreground image's y-offset (integer, in %)</label>
+                <br/>
+                <input id="fgYOffset" type="number">
+                <br/>
+                <a id="downloadCanvas" href="#" download="blendedImage.png" hidden>Download blended image</a>
                 <p id="uploadStatusArea"></p>
                 <div id="previewArea"></div>
             </div>

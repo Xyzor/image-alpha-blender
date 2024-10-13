@@ -2,21 +2,23 @@ const canvas = document.getElementById('canvas');
 const context = canvas.getContext('2d');
 const fileInput = document.getElementById('fileInput');
 const fgAlphaInput = document.getElementById('fgAlpha');
+const bgAlphaInput = document.getElementById('bgAlpha');
+const fgXOffsetInput = document.getElementById('fgXOffset');
+const fgYOffsetInput = document.getElementById('fgYOffset');
+const overwriteOnlyNonZero = document.getElementById('overwriteOnlyNonZero');
+const downloadCanvasLink = document.getElementById('downloadCanvas');
 const uploadStatusArea = document.getElementById('uploadStatusArea');
 const previewArea = document.getElementById('previewArea');
 const reader = new FileReader();
 let imagesInPixel = [];
 
 const compositeAOverB = (aColor, aAlpha, bColor, bAlpha, combinedAlpha) => {
+    if (combinedAlpha === 0) return bColor;
     return (aAlpha * aColor + ((1 - aAlpha) * bAlpha * bColor)) / combinedAlpha;
 }
 
-const alphaToPercentage = (alpha) => alpha / 255;
-
-const blendForegroundIntoBackground = (bgImg, fgImg, fgAlpha, bgAlpha = 1, xOffsetOfFgInPixel = 0, yOffsetOfFgInPixel = 0) => {
-    // Two 0-alpha would result in a division-by-zero error.
-    // There's no point in blending if aAlpha 0.
-    if (fgAlpha === 0) return bgImg;
+const blendForegroundIntoBackground = (bgImg, fgImg, fgAlpha, bgAlpha, xOffsetOfFgInPixel, yOffsetOfFgInPixel) => {
+    if (fgAlpha === 0 && bgAlpha === 0) return bgImg;
 
     // const combinedAlpha = fgAlpha + ((1 - fgAlpha) * bgAlpha);
     const bytesPerPixel = 4;
@@ -34,10 +36,11 @@ const blendForegroundIntoBackground = (bgImg, fgImg, fgAlpha, bgAlpha = 1, xOffs
         const greenIndexBg = redIndexBg + 1;
         const blueIndexBg = redIndexBg + 2;
         const alphaIndexBg = redIndexBg + 3;
-        let alphaPercentageFg = alphaToPercentage(fgImg.data[alphaIndexFg]);
-        alphaPercentageFg = alphaPercentageFg === 1 ? fgAlpha : alphaPercentageFg;
-        let alphaPercentageBg = alphaToPercentage(bgImg.data[alphaIndexBg]);
-        alphaPercentageBg = alphaPercentageBg === 1 ? bgAlpha : alphaPercentageBg;
+        
+        if (overwriteOnlyNonZero.checked && !fgImg.data[alphaIndexFg]) continue;
+
+        const alphaPercentageFg = typeof fgAlpha === 'number' ? fgAlpha : fgImg.data[alphaIndexFg] / 255;
+        const alphaPercentageBg = typeof bgAlpha === 'number' ? bgAlpha : bgImg.data[alphaIndexBg] / 255;
         const combinedAlpha = alphaPercentageFg + ((1 - alphaPercentageFg) * alphaPercentageBg);
 
         const currentPixelFg = (redIndexFg / bytesPerPixel) + 1;
@@ -90,10 +93,10 @@ const drawBlendedImageDataOnCanvas = () => {
         blendForegroundIntoBackground(
             imagesInPixel[i - 1],
             imagesInPixel[i],
-            Number(fgAlphaInput.value) / 100,
-            1,
-            Math.floor(imagesInPixel[i].width * 0.25),
-            Math.floor(imagesInPixel[i].height * 0.45),
+            fgAlphaInput.value ? Number(fgAlphaInput.value) / 100 : undefined,
+            bgAlphaInput.value ? Number(bgAlphaInput.value) / 100 : undefined,
+            Math.round(imagesInPixel[i].width * (fgXOffsetInput.value / 100 || 0)),
+            Math.round(imagesInPixel[i].height * (fgYOffsetInput.value / 100 || 0)),
         );
     }
     context.putImageData(imagesInPixel[0], 0, 0);
@@ -137,9 +140,15 @@ const handleFileReaderEvent = (event) => {
             // but it's the easiest and there's no other reason to change.
             refreshImagesInPixelArray();
             drawBlendedImageDataOnCanvas();
+            updateImageDownloadLink();
         };
     }
 }
+
+const updateImageDownloadLink = () => {
+    downloadCanvasLink.hidden = false;
+    downloadCanvasLink.href = canvas.toDataURL('image/png');
+};
 
 fileInput.addEventListener('change', () => {
 	if (fileInput.files[0]) {
@@ -159,4 +168,29 @@ fileInput.addEventListener('change', () => {
 fgAlphaInput.addEventListener('change', (e) => {
     refreshImagesInPixelArray();
     drawBlendedImageDataOnCanvas();
+    updateImageDownloadLink();
+});
+
+bgAlphaInput.addEventListener('change', (e) => {
+    refreshImagesInPixelArray();
+    drawBlendedImageDataOnCanvas();
+    updateImageDownloadLink();
+});
+
+fgXOffsetInput.addEventListener('change', (e) => {
+    refreshImagesInPixelArray();
+    drawBlendedImageDataOnCanvas();
+    updateImageDownloadLink();
+});
+
+fgYOffsetInput.addEventListener('change', (e) => {
+    refreshImagesInPixelArray();
+    drawBlendedImageDataOnCanvas();
+    updateImageDownloadLink();
+});
+
+overwriteOnlyNonZero.addEventListener('change', (e) => {
+    refreshImagesInPixelArray();
+    drawBlendedImageDataOnCanvas();
+    updateImageDownloadLink();
 });
