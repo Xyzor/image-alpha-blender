@@ -13,7 +13,6 @@
             #filesArea {
                 flex: .25;
                 background-color: grey;
-                height: 100%;
                 overflow-y: auto;
             }
 
@@ -36,6 +35,7 @@
                 <canvas id="canvas">
             </div>
             <div id="filesArea">
+                <div>
                 <input type="file" id="fileInput" accept="image/*" />
                 <hr/>
                 <label for="fgAlpha">Overwrite foreground images' alphas (float, in %)</label>
@@ -66,7 +66,8 @@
                 <input id="fgYOffset" type="number">
                 <br/>
                 <a id="downloadCanvas" href="#" download="blendedImage.png" hidden>Download blended image</a>
-                <p id="uploadStatusArea"></p>
+                <hr/>
+                </div>
                 <div id="previewArea"></div>
             </div>
         </div>
