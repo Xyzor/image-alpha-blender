@@ -17,7 +17,7 @@ const compositeAOverB = (aColor, aAlpha, bColor, bAlpha, combinedAlpha) => {
     return (aAlpha * aColor + ((1 - aAlpha) * bAlpha * bColor)) / combinedAlpha;
 }
 
-const blendForegroundIntoBackground = (imgBg, imgFg, alphaFg, alphaBg, xOffsetInPixelFg = 0, yOffsetInPixelFg = 0) => {
+const blendForegroundIntoBackground = (imgFg, imgBg, alphaFg, alphaBg, xOffsetInPixelFg = 0, yOffsetInPixelFg = 0) => {
     if (alphaFg === 0 && alphaBg === 0) return imgBg;
 
     const bytesPerPixel = 4;
@@ -92,8 +92,8 @@ const drawBlendedImageDataOnCanvas = () => {
 
     for (let i = imagesInPixel.length - 1; i > 0; i--) {
         blendForegroundIntoBackground(
-            imagesInPixel[i - 1],
             imagesInPixel[i],
+            imagesInPixel[i - 1],
             fgAlphaInput.value ? Number(fgAlphaInput.value) / 100 : undefined,
             bgAlphaInput.value ? Number(bgAlphaInput.value) / 100 : undefined,
             Math.round(imagesInPixel[i].width * (fgXOffsetInput.value / 100 || 0)),
