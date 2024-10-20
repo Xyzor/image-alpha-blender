@@ -11,7 +11,7 @@ const previewArea = document.getElementById('previewArea');
 const reader = new FileReader();
 let imagesInPixel = [];
 
-const compositeAOverB = (aColor, aAlpha, bColor, bAlpha, combinedAlpha) => {
+const compositeAOverB = (aColor, bColor, aAlpha, bAlpha, combinedAlpha) => {
     if (combinedAlpha === 0) return bColor;
 
     return (aAlpha * aColor + ((1 - aAlpha) * bAlpha * bColor)) / combinedAlpha;
@@ -58,24 +58,24 @@ const blendForegroundIntoBackground = (imgFg, imgBg, alphaFg, alphaBg, xOffsetIn
         imgBg.data[redIndexBg] =
             compositeAOverB(
                 imgFg.data[redIndexFg],
-                alphaInPercentageFg,
                 imgBg.data[redIndexBg],
+                alphaInPercentageFg,
                 alphaInPercentageBg,
                 combinedAlpha
             );
         imgBg.data[greenIndexBg] =
             compositeAOverB(
                 imgFg.data[greenIndexFg],
-                alphaInPercentageFg,
                 imgBg.data[greenIndexBg],
+                alphaInPercentageFg,
                 alphaInPercentageBg,
                 combinedAlpha
             );
         imgBg.data[blueIndexBg] =
             compositeAOverB(
                 imgFg.data[blueIndexFg],
-                alphaInPercentageFg,
                 imgBg.data[blueIndexBg],
+                alphaInPercentageFg,
                 alphaInPercentageBg,
                 combinedAlpha
             );
