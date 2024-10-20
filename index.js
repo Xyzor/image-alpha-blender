@@ -11,10 +11,10 @@ const previewArea = document.getElementById('previewArea');
 const reader = new FileReader();
 let imagesInPixel = [];
 
-const compositeAOverB = (aColor, bColor, aAlpha, bAlpha, combinedAlpha) => {
-    if (combinedAlpha === 0) return bColor;
+const compositeColorAOverB = (colorA, colorB, alphaA, alphaB, alphaCombined) => {
+    if (alphaCombined === 0) return colorB;
 
-    return (aAlpha * aColor + ((1 - aAlpha) * bAlpha * bColor)) / combinedAlpha;
+    return (alphaA * colorA + ((1 - alphaA) * alphaB * colorB)) / alphaCombined;
 }
 
 const blendForegroundIntoBackground = (imgFg, imgBg, alphaFg, alphaBg, xOffsetInPixelFg = 0, yOffsetInPixelFg = 0) => {
@@ -37,7 +37,7 @@ const blendForegroundIntoBackground = (imgFg, imgBg, alphaFg, alphaBg, xOffsetIn
 
         const alphaInPercentageFg = typeof alphaFg === 'number' ? alphaFg : imgFg.data[alphaIndexFg] / 255;
         const alphaInPercentageBg = typeof alphaBg === 'number' ? alphaBg : imgBg.data[alphaIndexBg] / 255;
-        const combinedAlpha = alphaInPercentageFg + ((1 - alphaInPercentageFg) * alphaInPercentageBg);
+        const alphaInPercentageCombined = alphaInPercentageFg + ((1 - alphaInPercentageFg) * alphaInPercentageBg);
 
         // Debugging values
         /*
@@ -56,28 +56,28 @@ const blendForegroundIntoBackground = (imgFg, imgBg, alphaFg, alphaBg, xOffsetIn
         if (ignoreTransparentPixelFg || fgPixelIsOutsideOfBg) continue;
 
         imgBg.data[redIndexBg] =
-            compositeAOverB(
+            compositeColorAOverB(
                 imgFg.data[redIndexFg],
                 imgBg.data[redIndexBg],
                 alphaInPercentageFg,
                 alphaInPercentageBg,
-                combinedAlpha
+                alphaInPercentageCombined
             );
         imgBg.data[greenIndexBg] =
-            compositeAOverB(
+            compositeColorAOverB(
                 imgFg.data[greenIndexFg],
                 imgBg.data[greenIndexBg],
                 alphaInPercentageFg,
                 alphaInPercentageBg,
-                combinedAlpha
+                alphaInPercentageCombined
             );
         imgBg.data[blueIndexBg] =
-            compositeAOverB(
+            compositeColorAOverB(
                 imgFg.data[blueIndexFg],
                 imgBg.data[blueIndexBg],
                 alphaInPercentageFg,
                 alphaInPercentageBg,
-                combinedAlpha
+                alphaInPercentageCombined
             );
     }
 }
